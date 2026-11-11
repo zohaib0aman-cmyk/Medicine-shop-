@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 import { BagIcon, ClockIcon, CloseIcon, MapPinIcon, MenuIcon, PhoneIcon, SearchIcon, WhatsAppIcon } from "./icons";
 import { Button, LinkButton } from "./ui/Button";
-import { site } from "@/lib/site";
+import { useStore } from "@/lib/store";
 import { useOrder } from "@/lib/order";
-import { telLink } from "@/lib/whatsapp";
+import { telHref } from "@/lib/whatsapp";
 import { WaOrderLink } from "./WaOrderLink";
 
 const nav = [
@@ -66,6 +66,8 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState(false);
   const { count, setDrawerOpen } = useOrder();
+  const { shop } = useStore();
+  const telLink = telHref(shop.phoneE164);
 
   useMotionValueEvent(scrollY, "change", (y) => setShrunk(y > 40));
   useEffect(() => {
@@ -83,14 +85,14 @@ export function Header() {
         <div className="container-site flex h-full items-center justify-between gap-3">
           <span className="flex min-w-0 items-center gap-1.5 truncate">
             <span className="text-gold-300"><ClockIcon size={14} strokeWidth={3} /></span>
-            <span className="truncate">{site.timings}</span>
+            <span className="truncate">{shop.timings}</span>
           </span>
           <span className="hidden items-center gap-1.5 sm:flex">
             <span className="text-gold-300"><MapPinIcon size={14} strokeWidth={3} /></span>
-            Home delivery across {site.deliveryArea}
+            Home delivery across {shop.deliveryArea}
           </span>
           <a href={telLink} className="shrink-0 font-semibold text-gold-300 hover:text-gold">
-            {site.phoneDisplay}
+            {shop.phoneDisplay}
           </a>
         </div>
       </div>
@@ -107,7 +109,7 @@ export function Header() {
         <div className="absolute inset-x-0 bottom-0 hairline" aria-hidden />
         <div className="container-site relative flex h-[72px] items-center gap-3 lg:h-[84px]">
           <motion.div className="min-w-0 shrink-0 origin-left" animate={{ scale: shrunk ? 0.92 : 1 }} transition={{ type: "spring", stiffness: 300, damping: 26 }}>
-            <Logo compact={false} />
+            <Logo />
           </motion.div>
 
           <nav aria-label="Primary" className="ml-6 hidden xl:block">
@@ -131,7 +133,7 @@ export function Header() {
             <Button variant="outline" icon className="2xl:hidden" aria-label="Search" aria-expanded={search} onClick={() => setSearch((s) => !s)}>
               <SearchIcon size={20} strokeWidth={3} />
             </Button>
-            <LinkButton variant="outline" href={telLink} icon className="hidden sm:inline-flex lg:hidden" aria-label={`Call ${site.phoneDisplay}`}>
+            <LinkButton variant="outline" href={telLink} icon className="hidden sm:inline-flex lg:hidden" aria-label={`Call ${shop.phoneDisplay}`}>
               <PhoneIcon size={20} strokeWidth={2.6} />
             </LinkButton>
             <LinkButton variant="outline" href={telLink} className="hidden lg:inline-flex">
@@ -140,9 +142,11 @@ export function Header() {
             <WaOrderLink className="hidden lg:inline-flex">
               <WhatsAppIcon size={18} strokeWidth={2.6} /> Order on WhatsApp
             </WaOrderLink>
-            <Button variant="outline" icon aria-label={`Your order, ${count} items`} onClick={() => setDrawerOpen(true)} className="relative !overflow-visible">
-              <BagIcon size={20} strokeWidth={2.6} />
-              <AnimatePresence>
+            <span className="relative">
+            <Button variant="outline" icon aria-label={`Your order, ${count} items`} onClick={() => setDrawerOpen(true)}>
+                <BagIcon size={20} strokeWidth={2.6} />
+              </Button>
+                <AnimatePresence>
                 {count > 0 && (
                   <motion.span
                     key={count}
@@ -150,13 +154,13 @@ export function Header() {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 600, damping: 14 }}
-                    className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10.5px] font-bold text-emerald-950"
+                    className="pointer-events-none absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10.5px] font-bold text-emerald-950"
                   >
                     {count}
                   </motion.span>
                 )}
               </AnimatePresence>
-            </Button>
+            </span>
             <Button variant="outline" icon className="xl:hidden" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
               <MenuIcon size={20} open={menu} />
             </Button>

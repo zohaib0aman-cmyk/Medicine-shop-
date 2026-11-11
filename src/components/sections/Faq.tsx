@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useId, useState } from "react";
-import { faqs } from "@/data/content";
+import { useStore } from "@/lib/store";
 import { PlusIcon } from "../icons";
 import { Reveal, SectionHeading } from "../ui/Motion";
 
@@ -40,13 +40,15 @@ function Item({ q, a, open, onToggle }: { q: string; a: string; open: boolean; o
 
 export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const { faqs } = useStore();
+  if (faqs.length === 0) return null;
   return (
     <section id="faq" className="section bg-emerald-50/50">
       <div className="container-site max-w-3xl">
         <SectionHeading eyebrow="Questions" title="Frequently asked" />
         <div className="grid gap-3">
           {faqs.map((f, i) => (
-            <Reveal key={f.q} delay={i * 0.05}>
+            <Reveal key={i} delay={i * 0.05}>
               <Item {...f} open={open === i} onToggle={() => setOpen(open === i ? null : i)} />
             </Reveal>
           ))}

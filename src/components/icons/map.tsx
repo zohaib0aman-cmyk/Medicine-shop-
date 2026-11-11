@@ -1,31 +1,28 @@
-import type { ArtKind, CategoryId } from "@/data/catalog";
 import {
-  BabyBottleIcon, BlisterIcon, CapsuleIcon, FirstAidIcon, GlucoseIcon, LotionIcon, MortarIcon,
-  PrescriptionIcon, StethoscopeIcon, SyrupIcon, ThermometerIcon,
+  BabyBottleIcon, BlisterIcon, CapsuleIcon, CrossIcon, FirstAidIcon, GlucoseIcon, HeartIcon, LeafIcon, LotionIcon, MortarIcon,
+  PrescriptionIcon, ShieldIcon, StethoscopeIcon, SyrupIcon, ThermometerIcon,
 } from "./index";
 import type { IconProps } from "./IconBase";
 import type { ComponentType } from "react";
 
-export const categoryIcon: Record<CategoryId, ComponentType<IconProps>> = {
-  prescription: PrescriptionIcon,
-  otc: CapsuleIcon,
-  baby: BabyBottleIcon,
-  diabetes: GlucoseIcon,
-  skin: LotionIcon,
-  ayurvedic: MortarIcon,
-  devices: StethoscopeIcon,
-  firstaid: FirstAidIcon,
+/** Icons a category (or product illustration) can use — chosen in Admin › Categories / Products. */
+export const ICONS: Record<string, { label: string; Icon: ComponentType<IconProps> }> = {
+  prescription: { label: "Prescription", Icon: PrescriptionIcon },
+  capsule: { label: "Capsule", Icon: CapsuleIcon },
+  blister: { label: "Tablet strip", Icon: BlisterIcon },
+  syrup: { label: "Syrup bottle", Icon: SyrupIcon },
+  baby: { label: "Baby bottle", Icon: BabyBottleIcon },
+  glucose: { label: "Glucose drop", Icon: GlucoseIcon },
+  lotion: { label: "Lotion", Icon: LotionIcon },
+  mortar: { label: "Mortar & pestle", Icon: MortarIcon },
+  stethoscope: { label: "Stethoscope", Icon: StethoscopeIcon },
+  thermometer: { label: "Thermometer", Icon: ThermometerIcon },
+  firstaid: { label: "First-aid kit", Icon: FirstAidIcon },
+  heart: { label: "Heart", Icon: HeartIcon },
+  leaf: { label: "Leaf", Icon: LeafIcon },
+  shield: { label: "Shield", Icon: ShieldIcon },
+  cross: { label: "Medical cross", Icon: CrossIcon },
 };
+export { ICON_KEYS } from "./keys";
 
-export const artIcon: Record<ArtKind, ComponentType<IconProps>> = {
-  blister: BlisterIcon,
-  capsule: CapsuleIcon,
-  syrup: SyrupIcon,
-  lotion: LotionIcon,
-  baby: BabyBottleIcon,
-  glucose: GlucoseIcon,
-  thermometer: ThermometerIcon,
-  stethoscope: StethoscopeIcon,
-  firstaid: FirstAidIcon,
-  mortar: MortarIcon,
-};
+export const iconFor = (key: string): ComponentType<IconProps> => ICONS[key]?.Icon ?? CapsuleIcon;

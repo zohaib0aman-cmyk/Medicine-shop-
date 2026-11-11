@@ -10,9 +10,10 @@ import { Faq } from "@/components/sections/Faq";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/Footer";
 import { FloatingButtons, OrderDrawer, Toast } from "@/components/Floating";
-import { site } from "@/lib/site";
+import { getStorefront } from "@/lib/server/storefront";
 
-export default function Home() {
+export default async function Home() {
+  const store = await getStorefront();
   return (
     <>
       {/* page-load intro: the logo cross draws itself, then fades away */}
@@ -22,7 +23,7 @@ export default function Home() {
             <path className="intro-fill" d="M19.5 7h9a1.5 1.5 0 0 1 1.5 1.5V18h9.5a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H30v9.5a1.5 1.5 0 0 1-1.5 1.5h-9a1.5 1.5 0 0 1-1.5-1.5V30H8.5A1.5 1.5 0 0 1 7 28.5v-9A1.5 1.5 0 0 1 8.5 18H18V8.5A1.5 1.5 0 0 1 19.5 7Z" fill="#0F4C3A" stroke="none" />
             <path d="M19.5 7h9a1.5 1.5 0 0 1 1.5 1.5V18h9.5a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H30v9.5a1.5 1.5 0 0 1-1.5 1.5h-9a1.5 1.5 0 0 1-1.5-1.5V30H8.5A1.5 1.5 0 0 1 7 28.5v-9A1.5 1.5 0 0 1 8.5 18H18V8.5A1.5 1.5 0 0 1 19.5 7Z" stroke="#C9A24B" />
           </svg>
-          <span className="intro-fill font-serif text-xl tracking-wide text-emerald-900">{site.name}</span>
+          <span className="intro-fill font-serif text-xl tracking-wide text-emerald-900">{store.shop.name}</span>
         </div>
       </div>
 
@@ -32,18 +33,18 @@ export default function Home() {
       <ScrollProgress />
       <Header />
       <main id="main">
-        <Hero />
+        <Hero store={store} />
         <div className="hairline container-site" />
         <Categories />
         <Prescription />
         <Products />
         <WhyUs />
-        <Offers />
+        <Offers store={store} />
         <Reviews />
         <Faq />
-        <Contact />
+        <Contact store={store} />
       </main>
-      <Footer />
+      <Footer store={store} />
       <FloatingButtons />
       <OrderDrawer />
       <Toast />

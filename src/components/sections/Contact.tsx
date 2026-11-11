@@ -1,16 +1,19 @@
 import { ClockIcon, MailIcon, MapPinIcon, PhoneIcon, WhatsAppIcon } from "../icons";
 import { HoverCard, IconBadge, Reveal, SectionHeading } from "../ui/Motion";
 import { LinkButton } from "../ui/Button";
-import { fullAddress, site } from "@/lib/site";
-import { telLink, waLink } from "@/lib/whatsapp";
+import { fullAddress, type Storefront } from "@/lib/types";
+import { telHref, waLink } from "@/lib/whatsapp";
 
-export function Contact() {
-  const mapQuery = site.geo.lat ? `${site.geo.lat},${site.geo.lng}` : `${site.name}, ${fullAddress}`;
+export function Contact({ store }: { store: Storefront }) {
+  const site = store.shop;
+  const addr = fullAddress(site);
+  const telLink = telHref(site.phoneE164);
+  const mapQuery = site.lat ? `${site.lat},${site.lng}` : `${site.name}, ${addr}`;
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`;
 
   const rows = [
-    { Icon: MapPinIcon, label: "Visit us", value: fullAddress, href: directions, cta: "Get directions" },
+    { Icon: MapPinIcon, label: "Visit us", value: addr, href: directions, cta: "Get directions" },
     { Icon: ClockIcon, label: "Timings", value: site.timings },
     { Icon: PhoneIcon, label: "Call", value: site.phoneDisplay, href: telLink, cta: "Tap to call" },
     { Icon: MailIcon, label: "Email", value: site.email, href: `mailto:${site.email}` },
@@ -44,7 +47,7 @@ export function Contact() {
               <LinkButton variant="primary" href={telLink}>
                 <PhoneIcon size={18} strokeWidth={2.6} className="text-gold-300" /> Call Now
               </LinkButton>
-              <LinkButton variant="wa" href={waLink(`Hello ${site.name}!`)}>
+              <LinkButton variant="wa" href={waLink(site.whatsapp, `Hello ${site.name}!`)}>
                 <WhatsAppIcon size={18} strokeWidth={2.6} /> WhatsApp
               </LinkButton>
             </div>

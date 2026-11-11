@@ -3,11 +3,15 @@
 import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { OrderProvider } from "@/lib/order";
+import { StoreProvider } from "@/lib/store";
+import type { Storefront } from "@/lib/types";
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({ store, children }: { store: Storefront; children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
-      <OrderProvider>{children}</OrderProvider>
+      <StoreProvider value={store}>
+        <OrderProvider>{children}</OrderProvider>
+      </StoreProvider>
     </MotionConfig>
   );
 }

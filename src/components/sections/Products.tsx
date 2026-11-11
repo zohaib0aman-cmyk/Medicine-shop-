@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useRef, useState } from "react";
-import { categories, discountPct, inr, products, type Product } from "@/data/catalog";
-import { artIcon } from "../icons/map";
+import { discountPct, inr, type StoreProduct as Product } from "@/lib/types";
+import { iconFor } from "../icons/map";
+import { useStore } from "@/lib/store";
 import { BagIcon, CheckIcon, ChevronIcon, PrescriptionIcon } from "../icons";
 import { HoverCard, IconBadge, Reveal, SectionHeading } from "../ui/Motion";
 import { Button } from "../ui/Button";
@@ -14,6 +15,12 @@ function AddButton({ p }: { p: Product }) {
   const { add, prescription } = useOrder();
   const [done, setDone] = useState(false);
   const locked = p.rx && !prescription;
+  if (!p.inStock)
+    return (
+      <Button variant="outline" disabled className="w-full !py-2.5 text-[13px]">
+        Out of stock
+      </Button>
+    );
   return (
     <Button
       variant={locked ? "outline" : "primary"}
@@ -45,8 +52,8 @@ function AddButton({ p }: { p: Product }) {
   );
 }
 
-function ProductCard({ p, i }: { p: Product; i: number }) {
-  const Art = artIcon[p.art];
+function ProductCard({ p, i, categoryName }: { p: Product; i: number; categoryName?: string }) {
+  const Art = iconFor(p.art);
   const off = discountPct(p);
   return (
     <HoverCard as="article" className="flex h-full flex-col">
@@ -64,9 +71,12 @@ function ProductCard({ p, i }: { p: Product; i: number }) {
         {p.rx && <span className="badge-rx absolute right-2 top-2">Rx required</span>}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-4 pt-1">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600">{categories.find((c) => c.id === p.category)?.name}</p>
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-600">{categoryName}</p>
         <h3 className="mt-1 font-serif text-[1.12rem] leading-snug text-emerald-900">{p.name}</h3>
-        <p className="text-[12.5px] text-charcoal-50">{p.pack}</p>
+        <p className="text-[12.5px] text-charcoal-50">
+          {p.brand ? `${p.brand} · ` : ""}
+          {p.pack}
+        </p>
         <div className="mb-4 mt-3 flex items-baseline gap-2">
           <span className="text-lg font-bold text-emerald-900">{inr(p.price)}</span>
           {p.mrp > p.price && <span className="text-[13px] text-charcoal-50 line-through">MRP {inr(p.mrp)}</span>}
@@ -81,14 +91,18 @@ function ProductCard({ p, i }: { p: Product; i: number }) {
 
 export function Products() {
   const { query, category, setCategory, setQuery } = useOrder();
+  const { products, categories } = useStore();
+  const catName = useMemo(() => Object.fromEntries(categories.map((c) => [c.id, c.name])), [categories]);
   const track = useRef<HTMLUListElement>(null);
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter(
-      (p) => (category === "all" || p.category === category) && (!q || `${p.name} ${p.pack} ${p.category}`.toLowerCase().includes(q)),
+      (p) =>
+        (q ? true : category === "all" ? p.featured : p.category === category) &&
+        (!q || `${p.name} ${p.brand} ${p.pack} ${catName[p.category] ?? ""}`.toLowerCase().includes(q)),
     );
-  }, [query, category]);
+  }, [query, category, products, catName]);
 
   const scrollBy = (dir: number) => {
     const el = track.current;
@@ -104,7 +118,7 @@ export function Products() {
 
         <Reveal className="mb-6 flex items-center gap-3">
           <div className="no-scrollbar -mx-4 flex flex-1 gap-2 overflow-x-auto px-4 pb-1" role="tablist" aria-label="Filter by category">
-            {[{ id: "all" as const, name: "All" }, ...categories].map((c) => {
+            {[{ id: "all", name: "Featured" }, ...categories].map((c) => {
               const active = category === c.id;
               return (
                 <button
@@ -143,7 +157,7 @@ export function Products() {
           <ul ref={track} className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-6 pt-2" aria-label="Featured products">
             {list.map((p, i) => (
               <li key={p.id} className="w-[72%] shrink-0 snap-start sm:w-[44%] md:w-[31%] lg:w-[23.5%]">
-                <ProductCard p={p} i={i} />
+                <ProductCard p={p} i={i} categoryName={catName[p.category]} />
               </li>
             ))}
           </ul>

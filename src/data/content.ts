@@ -34,8 +34,3 @@ export const faqs = [
 export type Review = { name: string; text: string; rating: 1 | 2 | 3 | 4 | 5; source?: string };
 export const reviews: Review[] = [];
 
-export const faqSchema = () => ({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
-});

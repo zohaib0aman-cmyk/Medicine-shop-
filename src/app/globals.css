@@ -92,6 +92,7 @@ body > * { position: relative; z-index: 1; }
     background: linear-gradient(105deg, transparent 30%, rgba(255, 236, 190, 0.55) 48%, transparent 66%);
     transform: translateX(-120%);
     transition: transform .8s cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
   }
   .btn:hover::after { transform: translateX(120%); }
   .btn-primary { @apply bg-emerald-800 text-cream-50 shadow-[0_8px_20px_-8px_rgba(15,76,58,.6)]; }

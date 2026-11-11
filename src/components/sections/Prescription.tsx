@@ -1,13 +1,17 @@
 "use client";
 
+import { KeepForm } from "@/components/ui/Form";
+
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useTransition } from "react";
 import { CameraIcon, CheckIcon, CloseIcon, PhoneIcon, ScooterIcon, UploadIcon, WhatsAppIcon } from "../icons";
 import { HoverCard, IconBadge, Reveal, SectionHeading } from "../ui/Motion";
 import { Button, LinkButton } from "../ui/Button";
 import { useOrder } from "@/lib/order";
 import { prescriptionMessage, waLink } from "@/lib/whatsapp";
-import { rxNotice } from "@/lib/site";
+import { rxNotice } from "@/lib/types";
+import { useStore } from "@/lib/store";
+import { submitPrescription } from "@/app/(site)/actions";
 
 const steps = [
   { Icon: UploadIcon, title: "Upload photo", text: "Snap a clear photo of your doctor's prescription and add it here." },
@@ -20,8 +24,25 @@ export function Prescription() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 55%"] });
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
   const scale = useTransform(progress, [0, 1], [0, 1]);
-  const { prescription, setPrescription } = useOrder();
+  const { prescription, setPrescription, notify } = useOrder();
+  const { shop, live } = useStore();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [pending, start] = useTransition();
+  const [sent, setSent] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const send = (fd: FormData) => {
+    if (!prescription) return;
+    fd.set("file", prescription.file);
+    setErr(null);
+    start(async () => {
+      const r = await submitPrescription(fd);
+      if (r.ok) {
+        setSent(r.message ?? "Sent");
+        notify("Prescription sent to our pharmacist.");
+      } else setErr(r.error);
+    });
+  };
 
   return (
     <section id="prescription" className="section relative bg-emerald-50/60">
@@ -69,8 +90,12 @@ export function Prescription() {
                 <h3 className="font-serif text-2xl text-emerald-900">{prescription ? "Prescription added" : "Add your prescription"}</h3>
                 <p className="mt-1 text-[13.5px] text-charcoal-70">
                   {prescription
-                    ? "Prescription items are now unlocked. Attach this same photo in the WhatsApp chat when you send your order."
-                    : "JPG, PNG or PDF. Your photo stays on your device — you'll attach it in the WhatsApp chat with us."}
+                    ? live
+                      ? "Prescription items are now unlocked. It will be uploaded securely with your order — or send it to our pharmacist now for a call-back."
+                      : "Prescription items are now unlocked. Attach this same photo in the WhatsApp chat when you send your order."
+                    : live
+                      ? "JPG, PNG or PDF, up to 5 MB. Stored privately — only our pharmacy staff can see it."
+                      : "JPG, PNG or PDF. Your photo stays on your device — you'll attach it in the WhatsApp chat with us."}
                 </p>
                 <input
                   ref={inputRef}
@@ -80,7 +105,9 @@ export function Prescription() {
                   id="rx-file"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) setPrescription(f);
+                    if (f && f.size > 5 * 1024 * 1024) notify("File is too large (max 5 MB).", "warn");
+                    else if (f) setPrescription(f);
+                    setSent(null);
                     e.target.value = "";
                   }}
                 />
@@ -107,10 +134,29 @@ export function Prescription() {
                   <Button variant="primary" onClick={() => inputRef.current?.click()}>
                     <UploadIcon size={20} strokeWidth={2.4} className="text-gold-300" /> {prescription ? "Replace photo" : "Upload Prescription"}
                   </Button>
-                  <LinkButton variant="wa" href={waLink(prescriptionMessage)}>
+                  <LinkButton variant="wa" href={waLink(shop.whatsapp, prescriptionMessage(shop.name))}>
                     <WhatsAppIcon size={20} strokeWidth={2.4} /> Send on WhatsApp
                   </LinkButton>
                 </div>
+                {live && prescription && !sent && (
+                  <KeepForm action={send} className="mt-5 grid gap-2 rounded-xl border border-gold/30 bg-cream-100/70 p-4 text-left">
+                    <p className="text-[13px] font-semibold text-emerald-900">Only need a call-back? Send it straight to our pharmacist:</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <input name="name" required maxLength={80} placeholder="Your name" autoComplete="name" className="h-11 rounded-xl border border-cream-300 bg-cream-50 px-3 text-[14px] outline-none focus:border-gold focus:ring-2 focus:ring-gold/30" />
+                      <input name="phone" required inputMode="tel" maxLength={16} placeholder="Mobile number" autoComplete="tel" className="h-11 rounded-xl border border-cream-300 bg-cream-50 px-3 text-[14px] outline-none focus:border-gold focus:ring-2 focus:ring-gold/30" />
+                    </div>
+                    <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+                    {err && <p className="text-[12.5px] text-[#8b2525]">{err}</p>}
+                    <Button type="submit" variant="gold" disabled={pending}>
+                      {pending ? "Sending…" : "Send to pharmacist"}
+                    </Button>
+                  </KeepForm>
+                )}
+                {sent && (
+                  <p className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 p-3 text-[13.5px] text-emerald-900 sm:justify-start">
+                    <CheckIcon size={18} eager /> {sent}
+                  </p>
+                )}
               </div>
             </div>
           </HoverCard>

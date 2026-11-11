@@ -1,13 +1,14 @@
 "use client";
 
-import { categories } from "@/data/catalog";
-import { categoryIcon } from "../icons/map";
+import { iconFor } from "../icons/map";
+import { useStore } from "@/lib/store";
 import { ChevronIcon } from "../icons";
 import { HoverCard, IconBadge, Reveal, SectionHeading } from "../ui/Motion";
 import { useOrder } from "@/lib/order";
 
 export function Categories() {
   const { setCategory, setQuery } = useOrder();
+  const { categories, products } = useStore();
   return (
     <section id="categories" className="section">
       <div className="container-site">
@@ -15,7 +16,8 @@ export function Categories() {
         <Reveal>
           <ul className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {categories.map((c, i) => {
-              const Icon = categoryIcon[c.id];
+              const Icon = iconFor(c.icon);
+              const allRx = products.some((p) => p.category === c.id) && products.filter((p) => p.category === c.id).every((p) => p.rx);
               return (
                 <li key={c.id}>
                   <HoverCard className="h-full">
@@ -36,7 +38,7 @@ export function Categories() {
                       <span className="mt-auto hidden items-center gap-1 text-[12px] font-semibold uppercase tracking-wider text-gold-600 sm:inline-flex">
                         Browse <ChevronIcon size={14} />
                       </span>
-                      {c.id === "prescription" && <span className="badge-rx">Rx required</span>}
+                      {(c.id === "prescription" || allRx) && <span className="badge-rx">Rx required</span>}
                     </button>
                   </HoverCard>
                 </li>

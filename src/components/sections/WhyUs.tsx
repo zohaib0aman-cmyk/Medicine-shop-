@@ -4,7 +4,7 @@ import { animate, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { ClockIcon, PharmacistIcon, ShieldIcon, TagIcon } from "../icons";
 import { HoverCard, IconBadge, Reveal, SectionHeading } from "../ui/Motion";
-import { site } from "@/lib/site";
+import { useStore } from "@/lib/store";
 
 const features = [
   { Icon: ShieldIcon, title: "100% Genuine", text: "Sourced only from authorised distributors, stored as per label conditions." },
@@ -41,6 +41,7 @@ function CountUp({ to, suffix }: { to: number; suffix: string }) {
 }
 
 export function WhyUs() {
+  const { stats } = useStore();
   return (
     <section id="why-us" className="section relative overflow-hidden bg-emerald-900 text-cream-100">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(201,162,75,.18),transparent_60%)]" />
@@ -69,10 +70,10 @@ export function WhyUs() {
           ))}
         </ul>
 
-        <div className="hairline my-12" />
+        {stats.length > 0 && <div className="hairline my-12" />}
         <dl className="grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
-          {site.stats.map((s) => (
-            <Reveal key={s.label}>
+          {stats.map((s) => (
+            <Reveal key={s.label + s.value}>
               <dt className="sr-only">{s.label}</dt>
               <dd className="font-serif text-4xl text-gold-300 sm:text-5xl">
                 <CountUp to={s.value} suffix={s.suffix} />

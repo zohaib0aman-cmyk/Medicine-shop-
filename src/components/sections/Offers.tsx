@@ -1,9 +1,11 @@
 import { ScooterIcon, TagIcon } from "../icons";
 import { Reveal } from "../ui/Motion";
-import { site } from "@/lib/site";
 import { WaOrderLink } from "../WaOrderLink";
+import type { Storefront } from "@/lib/types";
 
-export function Offers() {
+export function Offers({ store }: { store: Storefront }) {
+  const { offer, shop } = store;
+  if (!offer.active) return null;
   return (
     <section aria-label="Offers" className="py-10 sm:py-14">
       <div className="container-site">
@@ -15,11 +17,15 @@ export function Offers() {
                 <ScooterIcon size={46} delay={0.08} />
               </div>
               <div className="flex-1">
-                <p className="eyebrow">This month at {site.name}</p>
-                <p className="mt-1 font-serif text-2xl leading-tight text-emerald-900 sm:text-[1.7rem]">Free home delivery across {site.deliveryArea}</p>
-                <p className="mt-1 text-[13.5px] text-charcoal-70">[OFFER DETAILS — e.g. extra savings on monthly diabetes &amp; BP refills]</p>
+                <p className="eyebrow">
+                  {offer.eyebrow} at {shop.name}
+                </p>
+                <p className="mt-1 font-serif text-2xl leading-tight text-emerald-900 sm:text-[1.7rem]">{offer.title}</p>
+                {offer.details ? <p className="mt-1 text-[13.5px] text-charcoal-70">{offer.details}</p> : null}
               </div>
-              <WaOrderLink variant="gold" className="shrink-0">Claim on WhatsApp</WaOrderLink>
+              <WaOrderLink variant="gold" className="shrink-0">
+                {offer.cta || "Order now"}
+              </WaOrderLink>
             </div>
           </div>
         </Reveal>

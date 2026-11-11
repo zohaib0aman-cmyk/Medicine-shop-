@@ -1,7 +1,7 @@
 import { FacebookIcon, InstagramIcon, ReviewIcon } from "./icons";
 import { Logo } from "./Logo";
-import { fullAddress, rxNotice, site } from "@/lib/site";
-import { telLink } from "@/lib/whatsapp";
+import { fullAddress, rxNotice, type Storefront } from "@/lib/types";
+import { telHref } from "@/lib/whatsapp";
 
 const links = [
   ["Categories", "#categories"],
@@ -12,13 +12,14 @@ const links = [
   ["Contact", "#contact"],
 ];
 
-const social = [
-  { label: "Instagram", href: site.social.instagram, Icon: InstagramIcon },
-  { label: "Facebook", href: site.social.facebook, Icon: FacebookIcon },
-  { label: "Google reviews", href: site.social.google, Icon: ReviewIcon },
-];
-
-export function Footer() {
+export function Footer({ store }: { store: Storefront }) {
+  const site = store.shop;
+  const telLink = telHref(site.phoneE164);
+  const social = [
+    { label: "Instagram", href: site.instagram, Icon: InstagramIcon },
+    { label: "Facebook", href: site.facebook, Icon: FacebookIcon },
+    { label: "Google reviews", href: site.google, Icon: ReviewIcon },
+  ].filter((s) => s.href);
   return (
     <footer className="relative bg-emerald-950 pb-28 pt-16 text-cream-200 sm:pb-12">
       <div className="absolute inset-x-0 top-0 hairline" aria-hidden />
@@ -55,7 +56,7 @@ export function Footer() {
               <div><dt className="inline text-gold-300">Drug Licence No.: </dt><dd className="inline">{site.drugLicence}</dd></div>
               <div><dt className="inline text-gold-300">GSTIN: </dt><dd className="inline">{site.gstin}</dd></div>
               <div><dt className="inline text-gold-300">Pharmacist: </dt><dd className="inline">{site.pharmacist}</dd></div>
-              <div><dt className="sr-only">Address</dt><dd>{fullAddress}</dd></div>
+              <div><dt className="sr-only">Address</dt><dd>{fullAddress(site)}</dd></div>
               <div><dt className="sr-only">Phone</dt><dd><a href={telLink} className="hover:text-gold-300">{site.phoneDisplay}</a></dd></div>
               <div><dt className="sr-only">Timings</dt><dd>{site.timings}</dd></div>
             </dl>
